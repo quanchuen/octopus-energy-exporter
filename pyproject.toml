@@ -1,0 +1,11 @@
+[project]
+name = "octopus-energy-exporter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "prometheus-client>=0.25.0",
+    "pyrefly>=0.60.0",
+    "requests>=2.34.2",
+]
