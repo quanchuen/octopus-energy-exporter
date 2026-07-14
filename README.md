@@ -25,8 +25,8 @@ services:
   oejp-exporter:
     build: .
     environment:
-      - OEJP_EMAIL=your_account_number
-      - OEJP_PASSWORD=your_api_key
+      - OEJP_EMAIL=oejp_email_address
+      - OEJP_PASSWORD=oejp_password
     labels:
       - prometheus.io/scrape: "true"
       - prometheus.io/port: "9090"
