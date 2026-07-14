@@ -67,6 +67,56 @@ oejp_half_hour_cost_estimate_yen{account="A-00000000",consumption_rate_band="CON
 oejp_half_hour_reading_timestamp_seconds{account="A-00000000",consumption_rate_band="CONSUMPTION_STEPPED_03_01",consumption_step="0",supply_amperage="40",supply_kva="None",supply_kw="None",supply_valid_from="****-**-**"} 1.78398e+09
 ```
 
+## Alerting
+
+Some example [Prometheus alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/).
+Point Prometheus at them with `rule_files:` in `prometheus.yml`, then tune the thresholds
+(`3 * 3600`, `15000`, `1`) to your own household.
+
+```yaml
+groups:
+  - name: oejp-exporter
+    rules:
+      # 1. Stale data: the newest reading's endAt is too far in the past.
+      #    OEJP frequently lags an hour or two, so 3h leaves headroom.
+      - alert: OEJPDataStale
+        expr: (time() - oejp_half_hour_reading_timestamp_seconds) > 3 * 3600
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OEJP data is stale for {{ $labels.account }}"
+          description: "Latest reading is {{ $value | humanizeDuration }} old (>3h); the API may not be returning recent data."
+
+      # 2. Projected monthly cost exceeds budget.
+      #    Average half-hourly cost over the last day, extrapolated to a month
+      #    (48 half-hours/day * 30.44 days/month). Threshold below is in yen.
+      - alert: OEJPProjectedCostHigh
+        expr: avg by (account) (avg_over_time(oejp_half_hour_cost_estimate_yen[24h])) * 48 * 30.44 > 15000
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Projected monthly cost is high for {{ $labels.account }}"
+          description: "Projected monthly spend is about ¥{{ $value | humanize }} (threshold ¥15000)."
+
+      # 3. High power draw: average power over a 30-min window exceeds 1 kW.
+      #    0.5 kWh in a half-hour == 1 kW sustained, so *2 converts kWh/30min to kW.
+      - alert: OEJPHighPowerUsage
+        expr: max by (account) (oejp_half_hour_reading_kwh) * 2 > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High energy usage for {{ $labels.account }}"
+          description: "Average power in the latest half-hour window is {{ $value | humanize }} kW (>1 kW)."
+```
+
+> **Note:** `OEJPDataStale` only fires while the timestamp series still exists but is old.
+> If the exporter itself is down (or stops exposing an account entirely) the series goes
+> absent and this rule can't evaluate — pair it with an exporter-liveness alert such as
+> `up{job="oejp-exporter"} == 0` to cover that case.
+
 ## Trivia
 
 While Home Assistant is great and there's at least one existing [HACS Integration](https://github.com/BottlecapDave/HomeAssistant-OctopusEnergy)
