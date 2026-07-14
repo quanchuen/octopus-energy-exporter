@@ -6,6 +6,14 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "prometheus-client>=0.25.0",
-    "pyrefly>=0.60.0",
     "requests>=2.34.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pyrefly>=0.60.0",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
