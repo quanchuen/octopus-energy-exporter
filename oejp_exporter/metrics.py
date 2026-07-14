@@ -35,7 +35,7 @@ class OEJPCollector(Collector):
         readings = [
             {
                 **reading,
-                "supplyDetails": point.get("supplyDetails", {}) or {},
+                "supplyDetails": point.get("supplyDetails", [{}])[0],
             }
             for prop in account.get("properties", []) or []
             for point in prop.get("electricitySupplyPoints", []) or []
@@ -75,7 +75,7 @@ class OEJPCollector(Collector):
             if reading is None:
                 continue
 
-            supply_details = reading.get("supplyDetails", {}) or {}
+            supply_details = reading.get("supplyDetails", {})
             labels = [
                 account,
                 reading.get("consumptionRateBand", ""),
