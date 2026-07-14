@@ -75,3 +75,6 @@ current consumption and prediction. Currently I do not own any Solar Panels or H
 
 OEJP is providing half-hourly consumption data in time series format, so Prometheus is not the best fit for this. I had to
 supply the latest one reading. OTLP with Clickhouse would be perfect for this. But I'll leave that to Claude.
+
+Go would be a much better fit for this type of work, but I've used too much AI recently I wanted to write something 
+with less AI like a practice. An exporter seems to be a very good fit. But I ended up involving Claude anyway.
