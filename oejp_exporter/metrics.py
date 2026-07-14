@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
@@ -6,6 +7,16 @@ from prometheus_client.registry import Collector
 from .client import OEJPClient
 
 log = logging.getLogger(__name__)
+
+_LABELS = [
+    "account",
+    "consumption_rate_band",
+    "consumption_step",
+    "supply_amperage",
+    "supply_kva",
+    "supply_kw",
+    "supply_valid_from",
+]
 
 
 class OEJPCollector(Collector):
@@ -46,16 +57,32 @@ class OEJPCollector(Collector):
         # endAt is an ISO-8601 in string
         return max(readings, key=lambda r: r.get("endAt", ""))
 
+    @staticmethod
+    def _endat_to_epoch(value: str) -> float | None:
+        """Parse an ISO-8601 endAt string into Unix epoch seconds, or None."""
+        if not value:
+            return None
+        try:
+            return datetime.fromisoformat(value).timestamp()
+        except ValueError:
+            log.warning("could not parse endAt %r as a timestamp", value)
+            return None
+
     def collect(self):
         kwh = GaugeMetricFamily(
             "oejp_half_hour_reading_kwh",
             "Most recent half-hourly electricity consumption (kWh)",
-            labels=["account", "consumption_rate_band", "consumption_step", "supply_amperage", "supply_kva", "supply_kw", "supply_valid_from"],
+            labels=_LABELS,
         )
         cost = GaugeMetricFamily(
             "oejp_half_hour_cost_estimate_yen",
             "Estimated cost of the most recent half-hourly reading",
-            labels=["account", "consumption_rate_band", "consumption_step", "supply_amperage", "supply_kva", "supply_kw", "supply_valid_from"],
+            labels=_LABELS,
+        )
+        timestamp = GaugeMetricFamily(
+            "oejp_half_hour_reading_timestamp_seconds",
+            "Unix timestamp (endAt) of the most recent half-hourly reading",
+            labels=_LABELS,
         )
 
         try:
@@ -87,6 +114,10 @@ class OEJPCollector(Collector):
             ]
             kwh.add_metric(labels, float(reading["value"]))
             cost.add_metric(labels, float(reading["costEstimate"]))
+            epoch = self._endat_to_epoch(reading.get("endAt", ""))
+            if epoch is not None:
+                timestamp.add_metric(labels, epoch)
 
         yield kwh
         yield cost
+        yield timestamp
