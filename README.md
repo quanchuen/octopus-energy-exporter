@@ -37,6 +37,7 @@ services:
 Provide two consumption readings:
 - oejp_half_hour_reading_kwh
 - oejp_half_hour_cost_estimate_yen
+- oejp_half_hour_reading_timestamp_seconds
 
 Does not include the generated electricity.
 
@@ -48,6 +49,21 @@ With labels:
 - supply_kva
 - supply_kw
 - supply_valid_from
+
+Example data:
+
+```bash
+-> % curl -s localhost:9090|grep oejp
+# HELP oejp_half_hour_reading_kwh Most recent half-hourly electricity consumption (kWh)
+# TYPE oejp_half_hour_reading_kwh gauge
+oejp_half_hour_reading_kwh{account="A-00000000",consumption_rate_band="CONSUMPTION_STEPPED_03_01",consumption_step="0",supply_amperage="40",supply_kva="None",supply_kw="None",supply_valid_from="****-**-**"} 0.2
+# HELP oejp_half_hour_cost_estimate_yen Estimated cost of the most recent half-hourly reading
+# TYPE oejp_half_hour_cost_estimate_yen gauge
+oejp_half_hour_cost_estimate_yen{account="A-00000000",consumption_rate_band="CONSUMPTION_STEPPED_03_01",consumption_step="0",supply_amperage="40",supply_kva="None",supply_kw="None",supply_valid_from="****-**-**"} 5.26
+# HELP oejp_half_hour_reading_timestamp_seconds Unix timestamp (endAt) of the most recent half-hourly reading
+# TYPE oejp_half_hour_reading_timestamp_seconds gauge
+oejp_half_hour_reading_timestamp_seconds{account="A-00000000",consumption_rate_band="CONSUMPTION_STEPPED_03_01",consumption_step="0",supply_amperage="40",supply_kva="None",supply_kw="None",supply_valid_from="****-**-**"} 1.78398e+09
+```
 
 ## Trivia
 
