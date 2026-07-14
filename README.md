@@ -1,5 +1,7 @@
 # Octopus Energy Japan (OEJP) Exporter
 
+Not Affiliated with Octopus Energy in any way.
+
 A very basic Prometheus exporter for Octopus Energy Japan.
 
 Fetches half-hour usage from Octopus Energy API and exposes it as Prometheus metrics. From the [Official GraphQL API](https://api.oejp-kraken.energy/v1/graphql/)

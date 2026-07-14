@@ -1,7 +1,7 @@
 [project]
-name = "octopus-energy-exporter"
-version = "0.1.0"
-description = "Add your description here"
+name = "oejp-exporter"
+version = "1.0.0"
+description = "Personal Octopus Energy Japan (OEJP) Consumption Data Exporter"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
