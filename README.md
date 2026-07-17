@@ -31,7 +31,7 @@ services:
       - OEJP_PASSWORD=oejp_password
     labels:
       - prometheus.io/scrape: "true"
-      - prometheus.io/port: "9090"
+      - prometheus.io/port: "9100"
 ```
 
 ## The Octopus Energy Japan (OEJP) Collector

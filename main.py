@@ -31,8 +31,10 @@ def build_collector(env=os.environ) -> OEJPCollector:
 def install_shutdown_handlers(stop_event: threading.Event) -> None:
     """Set the given event when a termination signal is received, so the main
     thread can shut down gracefully instead of being hard-killed."""
+
     def _handle(signum, _frame):
-        log.info("received signal %s, shutting down", signal.Signals(signum).name)
+        log.info("received signal %s, shutting down",
+                 signal.Signals(signum).name)
         stop_event.set()
 
     signal.signal(signal.SIGINT, _handle)
@@ -44,7 +46,7 @@ def main(env=os.environ):
 
     REGISTRY.register(build_collector(env))
 
-    port = int(env.get("EXPORTER_PORT", "9090"))
+    port = int(env.get("EXPORTER_PORT", "9100"))
     addr = env.get("EXPORTER_ADDR", "0.0.0.0")
     server, _thread = start_http_server(port=port, addr=addr)
     log.info("OEJP exporter listening on %s:%s", addr, port)
